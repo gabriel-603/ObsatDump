@@ -1,4 +1,10 @@
 ##SALVAR O ARQUIVO COMO 'main.py' PARA SE INICIAR SOZINHO
+## CODIGO PARA CIRAR ACCESS POINT:
+#import network
+#ap = network.WLAN(network.AP_IF)
+#ap.active(True)
+#ap.config(essid='REDE', password='SENHA')
+
 
 ##libraries
 import network
