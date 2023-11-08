@@ -13,7 +13,6 @@ import os
 import machine
 from machine import Pin
 from machine import I2C, Pin
-import time
 from bmp280 import *
 from mpu9250 import MPU9250
 from bmp180 import BMP180
@@ -25,7 +24,7 @@ import urequests
 from machine import UART
 import gc
 import ujson
-# Enable the garbage collector
+## Enable the garbage collector
 gc.enable()
 
 
