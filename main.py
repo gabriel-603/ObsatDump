@@ -1,4 +1,3 @@
-##SALVAR O ARQUIVO COMO 'main.py' PARA SE INICIAR SOZINHO
 ## CODIGO PARA CIRAR ACCESS POINT:
 #import network
 #ap = network.WLAN(network.AP_IF)
@@ -34,10 +33,6 @@ uart1 = UART(1, baudrate=9600, tx=17, rx=16)
 
 
 
-rede_wifi = "REDE"
-senha_wifi = "senha"
-servidor_url = "url"
-
 ##Define variaveis
 log_number = None
 atm_pressure = None
@@ -70,9 +65,6 @@ def sht20_humidity():
 	t=i2c.readfrom(0x40, 2)
 	return -6+125*(t[0]*256+t[1])/65535
 
-sta_if = network.WLAN(network.STA_IF)
-
-sta_if.active(True)
 
 
 adc35=ADC(Pin(35))
@@ -81,13 +73,9 @@ adc35.width(ADC.WIDTH_12BIT)
 
 
 ##Inicia setup (wifi, SD e sensores)
-print('hello world, starting setup')
-sta_if = network.WLAN(network.STA_IF); sta_if.active(True)
-sta_if.scan()
+print('hello world, starting setup!')
 #mudar antes de rodar
-sta_if.connect(rede_wifi,senha_wifi)
 print("Waiting for Wifi connection")
-while not sta_if.isconnected(): time.sleep(1)
 print("Connected")
 sdcard=machine.SDCard(slot=2, width=1, cd=None, wp=None, sck=Pin(18), miso=Pin(19), mosi=Pin(23), cs=Pin(15), freq=20000000)
 os.mount(sdcard, '/sd')
@@ -108,17 +96,16 @@ bus=I2C(scl=Pin(22), sda=Pin(21))
 sCCS811 = CCS811.CCS811(i2c=bus, addr=90)
 
 print('end of setup')
-print(sta_if.ifconfig())
 log_number = 1
 
-def send_data_in_chunks(url, data):
+def send_data_in_chunks(data):
     chunk_size = 1024  # Adjust the chunk size based on available memory
     data_str = ujson.dumps(data)
     try:
         i = 0
         while i < len(data_str):
             chunk = data_str[i:i + chunk_size]
-            HTTP_request = urequests.post(url, data=chunk)
+            uart1.write(str(chunk))
             i += len(chunk)
     except MemoryError:
         print("Error: Not enough memory")
@@ -167,8 +154,7 @@ while True:
     time.sleep(1)
 
    # Try to send data via POST request, handle memory errors
-    send_data_in_chunks(servidor_url, http_data)
-
+    
     # Combine data for the SD card and write to a file
     file_data = '{{"http_data":{}, "cam_data":{}}}'.format(http_data, cam)
     file_name = '/sd/log_vac_test{}.csv'.format(log_number)
@@ -179,9 +165,9 @@ while True:
     print(http_data)
 
     # Send data via UART
-    uart1.write(str(http_data))
+    send_data_in_chunks(http_data)
     log_number += 1
     print('End of transmission\n')
 
     # Wait for the specified time
-    time.sleep(180)
+    time.sleep(18)
