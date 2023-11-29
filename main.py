@@ -54,16 +54,16 @@ arquivo = None
 
 ##Inicia sensores
 def sht20_temperature():
-	i2c.writeto(0x40,b'\xf3')
-	time.sleep_ms(70)
-	t=i2c.readfrom(0x40, 2)
-	return -46.86+175.72*(t[0]*256+t[1])/65535
+    i2c.writeto(0x40,b'\xf3')
+    time.sleep_ms(70)
+    t=i2c.readfrom(0x40, 2)
+    return -46.86+175.72*(t[0]*256+t[1])/65535
 
 def sht20_humidity():
-	i2c.writeto(0x40,b'\xf5')
-	time.sleep_ms(70)
-	t=i2c.readfrom(0x40, 2)
-	return -6+125*(t[0]*256+t[1])/65535
+    i2c.writeto(0x40,b'\xf5')
+    time.sleep_ms(70)
+    t=i2c.readfrom(0x40, 2)
+    return -6+125*(t[0]*256+t[1])/65535
 
 
 
@@ -118,8 +118,8 @@ while True:
 
     ##medidas dos sensores
     bmp280.normal_measure()
-    atm_pressure = (bmp280.pressure) / 101325
-    temperature_reading = bmp280.temperature
+    atm_pressure = (bmp280.pressure)*2 / 101325
+    temperature_reading = sht20_temperature()
     co2 = sCCS811.eCO2
     gyro_data = 'gyro rate:' + str(mpu9250s.gyro)
     aceleration_data = 'accerelation rate:' + str(mpu9250s.acceleration)
@@ -127,11 +127,20 @@ while True:
     altitude = bmp180.altitude
 
     ##le os dados da camera
-    cam = uart1.read(3200)
-    if cam == None:
-      cam_status = 0
-    else:
-      cam_status = 1
+    try:
+   		cam = uart1.read(10000)
+        
+    	##if cam == None:
+      		#cam_status = 0
+    	#else:
+    		#cam_status = 1
+    except MemoryError:
+    	print('ME, failed to read')
+    	cam_status = 2
+    except error as e:
+    	print('Unkown error, failed to read')
+		cacm_status = 3
+	cam_status=cam
 
     #converte bateria pra %
     battery_percentage = round((battery * 100) / 2600)
@@ -170,4 +179,4 @@ while True:
     print('End of transmission\n')
 
     # Wait for the specified time
-    time.sleep(18)
+    time.sleep(10)
