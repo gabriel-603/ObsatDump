@@ -13,14 +13,10 @@ void setup() {
 
 String receivedMessage = "";
 
-void processMessage(String message) {
-  // Process the received message as needed
-  Serial.print("Received Message: ");
-  Serial.println(message);
-}
+// Function to perform a software reset
 
 void loop() {
-  // Check if there is data available to read from the H-12 radio chip
+ // Check if there is data available to read from the H-12 radio chip
   while (h12Serial.available()) {
     // Read a chunk of data from the H-12 radio chip
     char chunk[32]; // Adjust the chunk size as needed
@@ -32,7 +28,8 @@ void loop() {
 
     // Process the received message if it's complete
     if (receivedMessage.endsWith("}")) {
-      processMessage(receivedMessage);
+      Serial.print("Received Message: ");
+      Serial.println(receivedMessage);
 
       // Clear the message buffer for the next message
       receivedMessage = "";
